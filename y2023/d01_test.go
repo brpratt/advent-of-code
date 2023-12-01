@@ -11,9 +11,12 @@ import (
 
 func TestSolveD01P01(t *testing.T) {
 	t.Run("example", func(t *testing.T) {
-		input := ``
+		input := `1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet`
 
-		expected := ""
+		expected := "142"
 
 		got, err := y2023.SolveD01P01(strings.NewReader(input))
 		if err != nil {
@@ -38,7 +41,7 @@ func TestSolveD01P01(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		expected := ""
+		expected := "55123"
 
 		if got != expected {
 			t.Fatalf("[expected %s] [actual %s]", expected, got)
@@ -48,9 +51,15 @@ func TestSolveD01P01(t *testing.T) {
 
 func TestSolveD01P02(t *testing.T) {
 	t.Run("example", func(t *testing.T) {
-		input := ``
+		input := `two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen`
 
-		expected := ""
+		expected := "281"
 
 		answer, err := y2023.SolveD01P02(strings.NewReader(input))
 		if err != nil {
@@ -74,7 +83,7 @@ func TestSolveD01P02(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		expected := ""
+		expected := "55260"
 
 		if got != expected {
 			t.Fatalf("[expected %s] [actual %s]", expected, got)
