@@ -1,24 +1,14 @@
 package y2023
 
 import (
-	"bufio"
-	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
+
+	"github.com/brpratt/advent-of-code/extract"
 )
-
-func readLines(r io.Reader) []string {
-	lines := make([]string, 0)
-	scanner := bufio.NewScanner(r)
-
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	return lines
-}
 
 func extractNumber(line string) int {
 	index := 0
@@ -40,58 +30,57 @@ func extractNumber(line string) int {
 	return number
 }
 
-func toNumber(runes []rune) (int, bool) {
-	str := string(runes)
-	switch {
-	case strings.HasPrefix(str, "one"):
-		return 1, true
-	case strings.HasPrefix(str, "two"):
-		return 2, true
-	case strings.HasPrefix(str, "three"):
-		return 3, true
-	case strings.HasPrefix(str, "four"):
-		return 4, true
-	case strings.HasPrefix(str, "five"):
-		return 5, true
-	case strings.HasPrefix(str, "six"):
-		return 6, true
-	case strings.HasPrefix(str, "seven"):
-		return 7, true
-	case strings.HasPrefix(str, "eight"):
-		return 8, true
-	case strings.HasPrefix(str, "nine"):
-		return 9, true
-	case unicode.IsDigit(runes[0]):
-		return int(runes[0] - '0'), true
-	default:
-		return 0, false
+func numberPrefix(s string) (rune, bool) {
+	prefixes := map[string]rune{
+		"one":   '1',
+		"two":   '2',
+		"three": '3',
+		"four":  '4',
+		"five":  '5',
+		"six":   '6',
+		"seven": '7',
+		"eight": '8',
+		"nine":  '9',
 	}
+
+	for k, v := range prefixes {
+		if strings.HasPrefix(s, k) {
+			return v, true
+		}
+	}
+
+	firstRune, _ := utf8.DecodeRuneInString(s)
+	if unicode.IsDigit(firstRune) {
+		return firstRune, true
+	}
+
+	return utf8.RuneError, false
 }
 
 func extractNumber2(line string) int {
 	index := 0
-	nums := []int{0, 0}
-	runes := []rune(line)
+	runes := []rune{0, 0}
+	lineRunes := []rune(line)
 
-	for i := range runes {
-		if num, ok := toNumber(runes[i:]); ok {
+	for i := range lineRunes {
+		if r, ok := numberPrefix(string(lineRunes[i:])); ok {
 			if index == 0 {
-				nums[0] = num
+				runes[0] = r
 				index += 1
 			}
 
-			nums[1] = num
+			runes[1] = r
 		}
 	}
 
-	number, _ := strconv.Atoi(fmt.Sprintf("%d%d", nums[0], nums[1]))
+	number, _ := strconv.Atoi(string(runes))
 
 	return number
 }
 
 func SolveD01P01(r io.Reader) (string, error) {
 	sum := 0
-	lines := readLines(r)
+	lines := extract.Lines(r)
 	for _, line := range lines {
 		number := extractNumber(line)
 		sum += number
@@ -102,7 +91,7 @@ func SolveD01P01(r io.Reader) (string, error) {
 
 func SolveD01P02(r io.Reader) (string, error) {
 	sum := 0
-	lines := readLines(r)
+	lines := extract.Lines(r)
 	for _, line := range lines {
 		number := extractNumber2(line)
 		sum += number
