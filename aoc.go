@@ -64,5 +64,6 @@ var years = map[int]year{
 	2023: []day{
 		{y2023.SolveD01P01, y2023.SolveD01P02},
 		{y2023.SolveD02P01, y2023.SolveD02P02},
+		{y2023.SolveD03P01, y2023.SolveD03P02},
 	},
 }
