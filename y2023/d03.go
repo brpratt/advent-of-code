@@ -2,7 +2,6 @@ package y2023
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"strconv"
 	"unicode"
@@ -33,8 +32,6 @@ func adjacent(s symbol, n number) bool {
 		return false
 	}
 
-	// number is within the y window
-
 	if n.loc.x > s.loc.x+1 {
 		return false
 	}
@@ -50,19 +47,6 @@ type schematic struct {
 	bound   point
 	numbers []number
 	symbols []symbol
-}
-
-func (sch schematic) show() {
-	fmt.Printf("bound: (%2d, %2d)\n", sch.bound.x, sch.bound.y)
-
-	fmt.Println("\nnumbers:")
-	for _, num := range sch.numbers {
-		fmt.Printf("\t%4d (%2d, %2d)\n", num.val, num.loc.x, num.loc.y)
-	}
-	fmt.Println("\nsymbols:")
-	for _, sym := range sch.symbols {
-		fmt.Printf("\t%s (%2d, %2d)\n", string(sym.val), sym.loc.x, sym.loc.y)
-	}
 }
 
 func parseSchematic(r io.Reader) (sch schematic) {
@@ -128,19 +112,8 @@ func parseSchematic(r io.Reader) (sch schematic) {
 }
 
 func SolveD03P01(r io.Reader) (string, error) {
-	sch := parseSchematic(r)
-
-	/*
-		fmt.Println("\nadjacencies:")
-		for isym, sym := range sch.symbols {
-			for inum, num := range sch.numbers {
-				fmt.Printf("\tsymbol %02d (%s) <=> number %02d (%4d): %v\n", isym, string(sym.val), inum, num.val, adjacent(sym, num))
-			}
-			fmt.Println()
-		}
-	*/
-
 	var sum int
+	sch := parseSchematic(r)
 
 	for _, sym := range sch.symbols {
 		for _, num := range sch.numbers {
@@ -154,9 +127,8 @@ func SolveD03P01(r io.Reader) (string, error) {
 }
 
 func SolveD03P02(r io.Reader) (string, error) {
-	sch := parseSchematic(r)
-
 	var sum int
+	sch := parseSchematic(r)
 
 	for _, sym := range sch.symbols {
 		if sym.val != '*' {
@@ -187,6 +159,4 @@ func SolveD03P02(r io.Reader) (string, error) {
 	}
 
 	return strconv.Itoa(sum), nil
-
-	return "", nil
 }
