@@ -71,5 +71,6 @@ var years = map[int]year{
 		{y2023.SolveD07P01, y2023.SolveD07P02},
 		{y2023.SolveD08P01, y2023.SolveD08P02},
 		{y2023.SolveD09P01, y2023.SolveD09P02},
+		{y2023.SolveD10P01, y2023.SolveD10P02},
 	},
 }
