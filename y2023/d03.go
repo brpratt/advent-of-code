@@ -5,38 +5,35 @@ import (
 	"io"
 	"strconv"
 	"unicode"
+
+	"github.com/brpratt/advent-of-code/grid"
 )
 
-type point struct {
-	x int
-	y int
-}
-
 type number struct {
-	loc    point
+	loc    grid.Point
 	val    int
 	digits int
 }
 
 type symbol struct {
-	loc point
+	loc grid.Point
 	val rune
 }
 
 func adjacent(s symbol, n number) bool {
-	if n.loc.y < s.loc.y-1 {
+	if n.loc.Y < s.loc.Y-1 {
 		return false
 	}
 
-	if n.loc.y > s.loc.y+1 {
+	if n.loc.Y > s.loc.Y+1 {
 		return false
 	}
 
-	if n.loc.x > s.loc.x+1 {
+	if n.loc.X > s.loc.X+1 {
 		return false
 	}
 
-	if n.loc.x < s.loc.x-n.digits {
+	if n.loc.X < s.loc.X-n.digits {
 		return false
 	}
 
@@ -44,13 +41,13 @@ func adjacent(s symbol, n number) bool {
 }
 
 type schematic struct {
-	bound   point
+	bound   grid.Point
 	numbers []number
 	symbols []symbol
 }
 
 func parseSchematic(r io.Reader) (sch schematic) {
-	var loc point
+	var loc grid.Point
 	var parsingNum bool
 	var num number
 	reader := bufio.NewReader(r)
@@ -66,12 +63,12 @@ func parseSchematic(r io.Reader) (sch schematic) {
 				val, _ := strconv.Atoi(string(b))
 				num.val = (num.val * 10) + val
 				num.digits += 1
-				loc.x += 1
+				loc.X += 1
 				continue
 			} else {
 				sch.numbers = append(sch.numbers, num)
-				num.loc.x = 0
-				num.loc.y = 0
+				num.loc.X = 0
+				num.loc.Y = 0
 				num.val = 0
 				num.digits = 0
 				parsingNum = false
@@ -80,33 +77,33 @@ func parseSchematic(r io.Reader) (sch schematic) {
 
 		switch {
 		case b == '.':
-			loc.x += 1
+			loc.X += 1
 		case b == '\n':
-			sch.bound.x = loc.x
-			loc.x = 0
-			loc.y += 1
+			sch.bound.X = loc.X
+			loc.X = 0
+			loc.Y += 1
 		case unicode.IsDigit(rune(b)):
 			parsingNum = true
 			val, _ := strconv.Atoi(string(b))
 			num.val = (num.val * 10) + val
 			num.digits += 1
-			num.loc.x = loc.x
-			num.loc.y = loc.y
-			loc.x += 1
+			num.loc.X = loc.X
+			num.loc.Y = loc.Y
+			loc.X += 1
 		default: // symbol
 			sym := symbol{
 				val: rune(b),
-				loc: point{
-					x: loc.x,
-					y: loc.y,
+				loc: grid.Point{
+					X: loc.X,
+					Y: loc.Y,
 				},
 			}
 			sch.symbols = append(sch.symbols, sym)
-			loc.x += 1
+			loc.X += 1
 		}
 	}
 
-	sch.bound.y = loc.y + 1
+	sch.bound.Y = loc.Y + 1
 
 	return
 }

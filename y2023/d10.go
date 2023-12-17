@@ -5,42 +5,35 @@ import (
 	"io"
 	"slices"
 	"strconv"
-)
 
-type direction int
-
-const (
-	up direction = iota
-	right
-	down
-	left
+	"github.com/brpratt/advent-of-code/grid"
 )
 
 // determine if a connects with b
 // d indicates the direction from a to b
-func connected(a, b rune, d direction) bool {
-	allowedDirections := map[direction][]rune{
-		up:    {'S', '|', 'L', 'J'},
-		down:  {'S', '|', 'F', '7'},
-		left:  {'S', '-', 'J', '7'},
-		right: {'S', '-', 'F', 'L'},
+func connected(a, b rune, d grid.Direction) bool {
+	allowedDirections := map[grid.Direction][]rune{
+		grid.Up:    {'S', '|', 'L', 'J'},
+		grid.Down:  {'S', '|', 'F', '7'},
+		grid.Left:  {'S', '-', 'J', '7'},
+		grid.Right: {'S', '-', 'F', 'L'},
 	}
 
 	if !slices.Contains(allowedDirections[d], a) {
 		return false
 	}
 
-	allowedRunes := map[direction][]rune{
-		up:    {'S', '|', '7', 'F'},
-		down:  {'S', '|', 'J', 'L'},
-		left:  {'S', '-', 'F', 'L'},
-		right: {'S', '-', 'J', '7'},
+	allowedRunes := map[grid.Direction][]rune{
+		grid.Up:    {'S', '|', '7', 'F'},
+		grid.Down:  {'S', '|', 'J', 'L'},
+		grid.Left:  {'S', '-', 'F', 'L'},
+		grid.Right: {'S', '-', 'J', '7'},
 	}
 
 	return slices.Contains(allowedRunes[d], b)
 }
 
-func parseField(r io.Reader) (f [][]rune) {
+func parseField(r io.Reader) (f grid.Grid[rune]) {
 	f = make([][]rune, 0)
 
 	y := 0
@@ -54,118 +47,75 @@ func parseField(r io.Reader) (f [][]rune) {
 	return
 }
 
-type grid[T any] [][]T
-
-func (g grid[any]) contains(p point) bool {
-	return p.y >= 0 && p.x >= 0 && p.y < len(g) && p.x < len(g[p.y])
-}
-
-func (g grid[any]) move(p point, d direction) (newp point, ok bool) {
-	switch d {
-	case up:
-		newp.x = p.x
-		newp.y = p.y - 1
-	case down:
-		newp.x = p.x
-		newp.y = p.y + 1
-	case left:
-		newp.x = p.x - 1
-		newp.y = p.y
-	case right:
-		newp.x = p.x + 1
-		newp.y = p.y
-	}
-
-	ok = g.contains(newp)
-	return
-}
-
-func (g grid[any]) emptyMask() [][]bool {
-	mask := make([][]bool, len(g))
-
-	for y, row := range g {
-		mask[y] = make([]bool, len(row))
-	}
-
-	return mask
-}
-
-func move(f [][]rune, p point, d direction) (point, bool) {
-	newp, ok := grid[rune](f).move(p, d)
-	if !ok {
-		return newp, false
-	}
-
-	tileA := f[p.y][p.x]
-	tileB := f[newp.y][newp.x]
-
-	return newp, connected(tileA, tileB, d)
-}
-
-type step struct {
-	p point
-	d direction
-}
-
-func walk(f [][]rune, start point) chan step {
-	steps := make(chan step)
-
-	go func() {
-		curr := start
-		visited := grid[rune](f).emptyMask()
-
-		visited[curr.y][curr.x] = true
-
-		var end bool
-		for !end {
-			end = true
-			for d := up; d <= left; d++ {
-				if next, ok := move(f, curr, d); ok && !visited[next.y][next.x] {
-					end = false
-					curr = next
-					visited[curr.y][curr.x] = true
-					steps <- step{curr, d}
-					break
-				}
-			}
-		}
-
-		close(steps)
-	}()
-
-	return steps
-}
-
-func findStart(f [][]rune) (p point) {
+func mainLoop(f grid.Grid[rune]) grid.Grid[bool] {
+	var loop grid.Grid[bool] = make([][]bool, len(f))
 	for y := 0; y < len(f); y++ {
-		for x := 0; x < len(f[y]); x++ {
-			if f[y][x] == 'S' {
-				p.y = y
-				p.x = x
-				return
-			}
-		}
+		loop[y] = make([]bool, len(f[y]))
 	}
 
-	return
-}
+	curr, _ := f.Find('S')
+	loop.SetValue(curr, true)
 
-func mainLoop(f [][]rune) [][]bool {
-	loop := grid[rune](f).emptyMask()
+	var end bool
+	for !end {
+		end = true
 
-	start := findStart(f)
-	loop[start.y][start.x] = true
+		for d := grid.Up; d <= grid.Left; d++ {
+			newp := grid.Move(curr, d)
+			prev, _ := f.Value(curr)
+			next, inBound := f.Value(newp)
+			visited, _ := loop.Value(newp)
 
-	steps := walk(f, start)
-	for {
-		if step, ok := <-steps; ok {
-			loop[step.p.y][step.p.x] = true
-		} else {
-			break
+			if inBound && connected(prev, next, d) && !visited {
+				end = false
+				curr = newp
+				loop.SetValue(curr, true)
+			}
 		}
 	}
 
 	return loop
+}
+
+func crossings(f grid.Grid[rune], loop grid.Grid[bool], p grid.Point) int {
+	var count int
+	var prevcorner rune
+
+	if partOfLoop, _ := loop.Value(p); partOfLoop {
+		return 0
+	}
+
+	newp := grid.Move(p, grid.Right)
+	onLoop, inBound := loop.Value(newp)
+	for inBound {
+		if onLoop {
+			tile, _ := f.Value(newp)
+			switch {
+			case tile == '|':
+				count++
+			case tile == 'F':
+				prevcorner = tile
+			case tile == '7':
+				if prevcorner != 'F' {
+					count++
+				}
+				prevcorner = tile
+			case tile == 'J':
+				if prevcorner != 'L' {
+					count++
+				}
+				prevcorner = tile
+			case tile == 'L':
+				prevcorner = tile
+			}
+		}
+
+		p = newp
+		newp = grid.Move(p, grid.Right)
+		onLoop, inBound = loop.Value(newp)
+	}
+
+	return count
 }
 
 func SolveD10P01(r io.Reader) (string, error) {
@@ -184,120 +134,63 @@ func SolveD10P01(r io.Reader) (string, error) {
 	return strconv.Itoa((count + 1) / 2), nil
 }
 
-func flood(points [][]bool, boundary [][]bool) {
-	check := make([]point, 0, 10)
-	for y := 0; y < len(points); y++ {
-		for x := 0; x < len(points[y]); x++ {
-			if points[y][x] {
-				check = append(check, point{y: y, x: x})
-			}
-		}
-	}
-
-	for len(check) != 0 {
-		cp := check[0]
-		check = check[1:]
-
-		points[cp.y][cp.x] = true
-
-		// up
-		if cp.y-1 >= 0 && !points[cp.y-1][cp.x] && !boundary[cp.y-1][cp.x] {
-			check = append(check, point{y: cp.y - 1, x: cp.x})
-		}
-		// right
-		if cp.x+1 < len(points[cp.y]) && !points[cp.y][cp.x+1] && !boundary[cp.y][cp.x+1] {
-			check = append(check, point{y: cp.y, x: cp.x + 1})
-		}
-		// down
-		if cp.y+1 < len(points) && !points[cp.y+1][cp.x] && !boundary[cp.y+1][cp.x] {
-			check = append(check, point{y: cp.y + 1, x: cp.x})
-		}
-		// left
-		if cp.x-1 >= 0 && !points[cp.y][cp.x-1] && !boundary[cp.y][cp.x-1] {
-			check = append(check, point{y: cp.y, x: cp.x - 1})
-		}
-	}
-}
-
 func SolveD10P02(r io.Reader) (string, error) {
 	f := parseField(r)
 	loop := mainLoop(f)
 
-	var start point
+	sreplace := [4][4]rune{
+		grid.Up: {
+			grid.Right: 'L',
+			grid.Down:  '|',
+			grid.Left:  'J',
+		},
+		grid.Right: {
+			grid.Down: 'F',
+			grid.Left: '-',
+		},
+		grid.Down: {
+			grid.Left: '7',
+		},
+	}
 
-findStart:
-	for y := 0; y < len(loop); y++ {
-		for x := 0; x < len(loop[y]); x++ {
-			if loop[y][x] {
-				start.y = y
-				start.x = x
-				break findStart
-			}
+	var d1 grid.Direction
+	var d2 grid.Direction
+	var foundD1 bool
+
+	spoint, _ := grid.Grid[rune](f).Find('S')
+	for d := grid.Up; d <= grid.Left; d++ {
+		newp := grid.Move(spoint, d)
+		if partOfLoop, _ := loop.Value(newp); !partOfLoop {
+			continue
+		}
+		if foundD1 {
+			d2 = d
+		} else {
+			d1 = d
+			foundD1 = true
 		}
 	}
 
-	first := true
-	prevd := up
-	prevp := start
-	steps := walk(f, start)
-	inner := grid[rune](f).emptyMask()
+	f.SetValue(spoint, sreplace[d1][d2])
 
-	for {
-		var step step
-		var ok bool
-
-		if step, ok = <-steps; !ok {
-			break
-		}
-
-		if first {
-			prevd = step.d
-			first = false
-		}
-
-		var innerPoint point
-		switch step.d {
-		case up:
-			innerPoint.y = prevp.y
-			innerPoint.x = prevp.x + 1
-		case right:
-			innerPoint.y = prevp.y + 1
-			innerPoint.x = prevp.x
-		case down:
-			innerPoint.y = prevp.y
-			innerPoint.x = prevp.x - 1
-		case left:
-			innerPoint.y = prevp.y - 1
-			innerPoint.x = prevp.x
-		}
-
-		if grid[bool](inner).contains(innerPoint) && !loop[innerPoint.y][innerPoint.x] {
-			inner[innerPoint.y][innerPoint.x] = true
-		}
-
-		if step.d == right && prevd == down {
-			innerPoint.y = prevp.y
-			innerPoint.x = prevp.x - 1
-			if grid[bool](inner).contains(innerPoint) && !loop[innerPoint.y][innerPoint.x] {
-				inner[innerPoint.y][innerPoint.x] = true
-			}
-		}
-
-		prevp = step.p
-		prevd = step.d
+	var inside grid.Grid[bool] = make([][]bool, len(f))
+	for y := 0; y < len(f); y++ {
+		inside[y] = make([]bool, len(f[y]))
 	}
-
-	flood(inner, loop)
-	// printField(f, loop, inner)
 
 	var count int
-	for y := 0; y < len(inner); y++ {
-		for x := 0; x < len(inner[y]); x++ {
-			if inner[y][x] {
+	for y := range loop {
+		for x := range loop[y] {
+			p := grid.Point{Y: y, X: x}
+			c := crossings(f, loop, p)
+			if c%2 != 0 {
+				inside.SetValue(p, true)
 				count++
 			}
 		}
 	}
+
+	// printField(f, loop, inside)
 
 	return strconv.Itoa(count), nil
 }

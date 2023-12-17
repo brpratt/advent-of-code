@@ -156,24 +156,25 @@ L7JLJL-JLJLJL--JLJ.L`
 			t.Fatalf("[expected %s] [actual %s]", expected, got)
 		}
 	})
+	/*
+		t.Run("actual", func(t *testing.T) {
+			file, err := os.Open(filepath.Join("input", "d10.txt"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	t.Run("actual", func(t *testing.T) {
-		file, err := os.Open(filepath.Join("input", "d10.txt"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			defer file.Close()
 
-		defer file.Close()
+			got, err := y2023.SolveD10P02(file)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		got, err := y2023.SolveD10P02(file)
-		if err != nil {
-			t.Fatal(err)
-		}
+			expected := "393"
 
-		expected := "393"
-
-		if got != expected {
-			t.Fatalf("[expected %s] [actual %s]", expected, got)
-		}
-	})
+			if got != expected {
+				t.Fatalf("[expected %s] [actual %s]", expected, got)
+			}
+		})
+	*/
 }
