@@ -160,7 +160,8 @@ func SolveD10P02(r io.Reader) (string, error) {
 	spoint, _ := grid.Grid[rune](f).Find('S')
 	for d := grid.Up; d <= grid.Left; d++ {
 		newp := grid.Move(spoint, d)
-		if partOfLoop, _ := loop.Value(newp); !partOfLoop {
+		newtile, _ := f.Value(newp)
+		if ok := connected('S', newtile, d); !ok {
 			continue
 		}
 		if foundD1 {
