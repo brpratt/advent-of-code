@@ -36,12 +36,10 @@ func connected(a, b rune, d grid.Direction) bool {
 func parseField(r io.Reader) (f grid.Grid[rune]) {
 	f = make([][]rune, 0)
 
-	y := 0
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		row := []rune(scanner.Text())
 		f = append(f, row)
-		y++
 	}
 
 	return
