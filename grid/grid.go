@@ -91,3 +91,24 @@ func (g Grid[T]) FindAll(t T) []Point {
 
 	return points
 }
+
+func (g Grid[T]) Row(n int) []T {
+	if n < 0 || n >= len(g) {
+		return nil
+	}
+
+	return g[n]
+}
+
+func (g Grid[T]) Column(n int) []T {
+	if n < 0 || n >= len(g[0]) {
+		return nil
+	}
+
+	c := make([]T, len(g))
+	for i := 0; i < len(g); i++ {
+		c[i] = g[i][n]
+	}
+
+	return c
+}
