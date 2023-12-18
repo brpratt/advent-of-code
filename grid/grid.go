@@ -1,5 +1,7 @@
 package grid
 
+import "fmt"
+
 type Direction int
 
 const (
@@ -12,6 +14,10 @@ const (
 type Point struct {
 	X int
 	Y int
+}
+
+func (p Point) String() string {
+	return fmt.Sprintf("(%d, %d)", p.X, p.Y)
 }
 
 func Move(p Point, d Direction) Point {
@@ -70,4 +76,18 @@ func (g Grid[T]) Find(t T) (Point, bool) {
 	}
 
 	return p, false
+}
+
+func (g Grid[T]) FindAll(t T) []Point {
+	points := make([]Point, 0)
+
+	for y := 0; y < len(g); y++ {
+		for x := 0; x < len(g[y]); x++ {
+			if g[y][x] == t {
+				points = append(points, Point{Y: y, X: x})
+			}
+		}
+	}
+
+	return points
 }
