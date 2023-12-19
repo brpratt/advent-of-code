@@ -2,9 +2,7 @@ package y2023
 
 import (
 	"bufio"
-	"errors"
 	"io"
-	"slices"
 	"strconv"
 
 	"github.com/brpratt/advent-of-code/grid"
@@ -33,59 +31,85 @@ func parseWalks(r io.Reader) []grid.Grid[rune] {
 	return walks
 }
 
+type symmertry int
+
 const (
-	none = iota
-	horizontal
+	horizontal symmertry = iota
 	vertical
 )
 
 type mirror struct {
-	symmetry int
+	symmetry symmertry
 	index    int
+	diff     int
 }
 
-func findMirror(g grid.Grid[rune]) (m mirror) {
-	// try finding horizontal mirrors
+func horizontalDiff(g grid.Grid[rune], y int) int {
+	var count int
+
+	if y < 0 || y >= len(g)-1 {
+		return -1
+	}
+
+	for n := 0; y-n >= 0 && y+n+1 < len(g); n++ {
+		row1 := g.Row(y - n)
+		row2 := g.Row(y + n + 1)
+
+		for x := range row1 {
+			if row1[x] != row2[x] {
+				count++
+			}
+		}
+	}
+
+	return count
+}
+
+func verticalDiff(g grid.Grid[rune], x int) int {
+	var count int
+
+	if x < 0 || x >= len(g[0])-1 {
+		return -1
+	}
+
+	for n := 0; x-n >= 0 && x+n+1 < len(g[0]); n++ {
+		column1 := g.Column(x - n)
+		column2 := g.Column(x + n + 1)
+
+		for y := range column1 {
+			if column1[y] != column2[y] {
+				count++
+			}
+		}
+	}
+
+	return count
+}
+
+func mirrors(g grid.Grid[rune]) []mirror {
+	var mirrors []mirror
+
 	for y := 0; y < len(g)-1; y++ {
-		var found bool = true
-
-		for n := 0; y-n >= 0 && y+n+1 < len(g); n++ {
-			row1 := g.Row(y - n)
-			row2 := g.Row(y + n + 1)
-			if !slices.Equal(row1, row2) {
-				found = false
-				break
-			}
+		m := mirror{
+			symmetry: horizontal,
+			index:    y,
+			diff:     horizontalDiff(g, y),
 		}
 
-		if found {
-			m.symmetry = horizontal
-			m.index = y
-			return
-		}
+		mirrors = append(mirrors, m)
 	}
 
-	// try finding vertical mirrors
 	for x := 0; x < len(g[0])-1; x++ {
-		var found bool = true
-
-		for n := 0; x-n >= 0 && x+n+1 < len(g[0]); n++ {
-			column1 := g.Column(x - n)
-			column2 := g.Column(x + n + 1)
-			if !slices.Equal(column1, column2) {
-				found = false
-				break
-			}
+		m := mirror{
+			symmetry: vertical,
+			index:    x,
+			diff:     verticalDiff(g, x),
 		}
 
-		if found {
-			m.symmetry = vertical
-			m.index = x
-			return
-		}
+		mirrors = append(mirrors, m)
 	}
 
-	return
+	return mirrors
 }
 
 func SolveD13P01(r io.Reader) (string, error) {
@@ -93,12 +117,17 @@ func SolveD13P01(r io.Reader) (string, error) {
 
 	var count int
 	for _, walk := range walks {
-		mirror := findMirror(walk)
-		switch mirror.symmetry {
-		case horizontal:
-			count += 100 * (mirror.index + 1)
-		case vertical:
-			count += mirror.index + 1
+		for _, m := range mirrors(walk) {
+			if m.diff != 0 {
+				continue
+			}
+
+			switch m.symmetry {
+			case horizontal:
+				count += 100 * (m.index + 1)
+			case vertical:
+				count += m.index + 1
+			}
 		}
 	}
 
@@ -106,5 +135,23 @@ func SolveD13P01(r io.Reader) (string, error) {
 }
 
 func SolveD13P02(r io.Reader) (string, error) {
-	return "", errors.New("not implemented")
+	walks := parseWalks(r)
+
+	var count int
+	for _, walk := range walks {
+		for _, m := range mirrors(walk) {
+			if m.diff != 1 {
+				continue
+			}
+
+			switch m.symmetry {
+			case horizontal:
+				count += 100 * (m.index + 1)
+			case vertical:
+				count += m.index + 1
+			}
+		}
+	}
+
+	return strconv.Itoa(count), nil
 }
