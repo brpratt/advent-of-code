@@ -83,7 +83,7 @@ func TestSolveD12P02(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		expected := ""
+		expected := "15454556629917"
 
 		if got != expected {
 			t.Fatalf("[expected %s] [actual %s]", expected, got)
