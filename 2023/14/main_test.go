@@ -45,7 +45,7 @@ O.#..O.#.#
 	})
 }
 
-func TestSolveD14P02(t *testing.T) {
+func TestPart02(t *testing.T) {
 	t.Run("example", func(t *testing.T) {
 		input := `O....#....
 O.OO#....#
