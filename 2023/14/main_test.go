@@ -73,7 +73,7 @@ O.#..O.#.#
 
 		platform := parsePlatform(input)
 
-		expected := 0
+		expected := 102055
 		got := part02(platform)
 
 		if got != expected {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/brpratt/advent-of-code/file"
 	"github.com/brpratt/advent-of-code/grid"
@@ -22,15 +23,27 @@ func parsePlatform(r io.Reader) grid.Grid[rune] {
 	return platform
 }
 
-// func printPlatform(g grid.Grid[rune]) {
-// 	for y := 0; y < len(g); y++ {
-// 		row := g.Row(y)
-// 		for _, v := range row {
-// 			fmt.Print(string(v))
-// 		}
-// 		fmt.Println()
-// 	}
-// }
+func hash(platform grid.Grid[rune]) string {
+	var builder strings.Builder
+
+	for y := 0; y < len(platform); y++ {
+		builder.WriteString(string(platform[y]))
+	}
+
+	return builder.String()
+}
+
+func hydrate(platform grid.Grid[rune], h string) {
+	var r = []rune(h)
+	var ri int
+
+	for y := 0; y < len(platform); y++ {
+		for x := 0; x < len(platform[y]); x++ {
+			platform[y][x] = r[ri]
+			ri++
+		}
+	}
+}
 
 func tilt(g grid.Grid[rune], d grid.Direction) {
 	var pin int
@@ -119,6 +132,28 @@ func spin(g grid.Grid[rune]) {
 	tilt(g, grid.Right)
 }
 
+func spinUntilRepeat(platform grid.Grid[rune]) map[string]int {
+	var count int
+
+	patterns := make(map[string]int)
+	prev := hash(platform)
+
+	for {
+		spin(platform)
+		h := hash(platform)
+
+		if _, ok := patterns[h]; ok {
+			hydrate(platform, prev)
+			return patterns
+		}
+
+		prev = h
+		count++
+		patterns[h] = count
+	}
+
+}
+
 func northLoad(platform grid.Grid[rune]) int {
 	var total int
 
@@ -150,9 +185,16 @@ func part01(platform grid.Grid[rune]) int {
 }
 
 func part02(platform grid.Grid[rune]) int {
-	for n := 0; n < 1000000000; n++ {
-		spin(platform)
+	initial := spinUntilRepeat(platform)
+	cycle := spinUntilRepeat(platform)
+
+	offset := (1000000000 - len(initial)) % len(cycle)
+	for h, c := range cycle {
+		if c == offset {
+			hydrate(platform, h)
+			break
+		}
 	}
-	tilt(platform, grid.Up)
+
 	return northLoad(platform)
 }
