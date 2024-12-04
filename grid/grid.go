@@ -9,6 +9,10 @@ const (
 	Right
 	Down
 	Left
+	UpLeft
+	UpRight
+	DownLeft
+	DownRight
 )
 
 type Point struct {
@@ -26,12 +30,24 @@ func Move(p Point, d Direction) Point {
 	switch d {
 	case Up:
 		np.Y--
+	case UpRight:
+		np.Y--
+		np.X++
 	case Right:
 		np.X++
+	case DownRight:
+		np.X++
+		np.Y++
 	case Down:
+		np.Y++
+	case DownLeft:
+		np.X--
 		np.Y++
 	case Left:
 		np.X--
+	case UpLeft:
+		np.X--
+		np.Y--
 	}
 
 	return np
