@@ -65,7 +65,7 @@ func TestPart02(t *testing.T) {
 
 		reports := parseReports(input)
 
-		expected := 0
+		expected := 364
 		got := part02(reports)
 
 		if got != expected {
