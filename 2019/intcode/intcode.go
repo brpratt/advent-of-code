@@ -2,6 +2,9 @@ package intcode
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/brpratt/advent-of-code/parse"
 )
 
 // Computer contains the execution of an intcode program
@@ -228,4 +231,18 @@ func (c *Computer) Run() error {
 	}
 
 	return nil
+}
+
+// FromText parses the intcode text into a program
+//
+// In text form, intcode programs are comma-separated numbers
+func FromText(text string) []int {
+	values := strings.Split(text, ",")
+	program := make([]int, len(values))
+
+	for i, v := range values {
+		program[i] = parse.MustAtoi(v)
+	}
+
+	return program
 }
