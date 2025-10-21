@@ -13,6 +13,7 @@ func part01(program []int) int {
 	c := intcode.NewComputer(program, in, out)
 
 	go c.Run()
+
 	in <- 1
 
 	var result int
@@ -34,7 +35,7 @@ func part02(program []int) int {
 	c := intcode.NewComputer(program, in, out)
 
 	go c.Run()
-	in <- 5
+	in <- 2
 	return <-out
 }
 
