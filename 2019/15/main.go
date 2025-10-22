@@ -1,12 +1,10 @@
-package day15
+package main
 
 import (
-	"aoc2019/intcode"
-	"bufio"
 	"fmt"
-	"io"
-	"strconv"
-	"strings"
+
+	"github.com/brpratt/advent-of-code/2019/intcode"
+	"github.com/brpratt/advent-of-code/file"
 )
 
 const (
@@ -57,8 +55,9 @@ func NewDroid(program []int) *Droid {
 func (d *Droid) Move() int {
 	d.in <- d.dir
 	status := <-d.out
-	
+
 	if status == Moved || status == MovedAndOxygen {
+		switch {
 		case d.dir == North:
 			d.dir = East
 		case d.dir == East:
@@ -67,7 +66,10 @@ func (d *Droid) Move() int {
 			d.dir = West
 		case d.dir == West:
 			d.dir = North
+		}
 	}
+
+	return 0
 }
 
 func (d *Droid) TurnRight() {
@@ -83,7 +85,7 @@ func (d *Droid) TurnRight() {
 	}
 }
 
-func SolvePart01(program []int) int {
+func part01(program []int) int {
 	d := NewDroid(program)
 
 	for {
@@ -100,24 +102,14 @@ func SolvePart01(program []int) int {
 	return 0
 }
 
-func SolvePart02(program []int) int {
+func part02(program []int) int {
 	return 0
 }
 
-func Solve(part int, input io.Reader) int {
-	scanner := bufio.NewScanner(input)
-	scanner.Scan()
-	values := strings.Split(scanner.Text(), ",")
+func main() {
+	lines := file.Must(file.ReadLines("input.txt"))
+	program := intcode.FromText(lines[0])
 
-	program := make([]int, len(values))
-	for i, v := range values {
-		num, _ := strconv.Atoi(v)
-		program[i] = num
-	}
-
-	if part == 1 {
-		return SolvePart01(program)
-	}
-
-	return SolvePart02(program)
+	fmt.Println(part01(program))
+	fmt.Println(part02(program))
 }

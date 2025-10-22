@@ -1,12 +1,10 @@
-package day13
+package main
 
 import (
-	"bufio"
-	"io"
-	"strconv"
-	"strings"
+	"fmt"
 
-	"aoc2019/intcode"
+	"github.com/brpratt/advent-of-code/2019/intcode"
+	"github.com/brpratt/advent-of-code/file"
 )
 
 const (
@@ -23,7 +21,7 @@ type tile struct {
 	id int
 }
 
-func SolvePart01(program []int) int {
+func part01(program []int) int {
 	in := make(chan int, 1)
 	out := make(chan int)
 	c := intcode.NewComputer(program, in, out)
@@ -80,21 +78,17 @@ func (g *grid) set(x, y, id int) {
 			g.tiles[i] = append(g.tiles[i], 0)
 		}
 
-		width, height = g.dim()
+		width, height = g.dim() //lint:ignore SA4006 setting height to maintain invariant
 	}
 
 	g.tiles[y][x] = id
-}
-
-func (g *grid) get(x, y int) int {
-	return g.tiles[y][x]
 }
 
 func (g *grid) dim() (int, int) {
 	return len(g.tiles[0]), len(g.tiles)
 }
 
-func SolvePart02(program []int) int {
+func part02(program []int) int {
 	program[0] = 2
 	in := make(chan int)
 	out := make(chan int)
@@ -157,20 +151,10 @@ func SolvePart02(program []int) int {
 	return score
 }
 
-func Solve(part int, input io.Reader) int {
-	scanner := bufio.NewScanner(input)
-	scanner.Scan()
-	values := strings.Split(scanner.Text(), ",")
+func main() {
+	lines := file.Must(file.ReadLines("input.txt"))
+	program := intcode.FromText(lines[0])
 
-	program := make([]int, len(values))
-	for i, v := range values {
-		num, _ := strconv.Atoi(v)
-		program[i] = num
-	}
-
-	if part == 1 {
-		return SolvePart01(program)
-	}
-
-	return SolvePart02(program)
+	fmt.Println(part01(program))
+	fmt.Println(part02(program))
 }

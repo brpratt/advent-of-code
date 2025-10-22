@@ -1,12 +1,11 @@
-package day11
+package main
 
 import (
-	"aoc2019/intcode"
-	"bufio"
 	"fmt"
-	"io"
-	"strconv"
 	"strings"
+
+	"github.com/brpratt/advent-of-code/2019/intcode"
+	"github.com/brpratt/advent-of-code/file"
 )
 
 type point struct {
@@ -53,10 +52,6 @@ func (r *robot) move() {
 	case left:
 		r.location.x--
 	}
-}
-
-func countUnique(points []point) int {
-	return 0
 }
 
 func paint(program []int, start int) map[point]int {
@@ -108,13 +103,14 @@ func paint(program []int, start int) map[point]int {
 	return painted
 }
 
-func SolvePart01(program []int) int {
+func part01(program []int) int {
 	painted := paint(program, 0)
 
 	return len(painted)
 }
 
-func SolvePart02(program []int) int {
+func part02(program []int) string {
+	var builder strings.Builder
 	painted := paint(program, 1)
 
 	maxX := 0
@@ -155,31 +151,21 @@ func SolvePart02(program []int) int {
 	for _, row := range hull {
 		for _, color := range row {
 			if color == 0 {
-				fmt.Print(" ")
+				fmt.Fprint(&builder, " ")
 			} else {
-				fmt.Print("#")
+				fmt.Fprint(&builder, "#")
 			}
 		}
-		fmt.Println()
+		fmt.Fprintln(&builder)
 	}
 
-	return 0
+	return builder.String()
 }
 
-func Solve(part int, input io.Reader) int {
-	scanner := bufio.NewScanner(input)
-	scanner.Scan()
-	values := strings.Split(scanner.Text(), ",")
+func main() {
+	lines := file.Must(file.ReadLines("input.txt"))
+	program := intcode.FromText(lines[0])
 
-	program := make([]int, len(values))
-	for i, v := range values {
-		num, _ := strconv.Atoi(v)
-		program[i] = num
-	}
-
-	if part == 1 {
-		return SolvePart01(program)
-	}
-
-	return SolvePart02(program)
+	fmt.Println(part01(program))
+	fmt.Println(part02(program))
 }

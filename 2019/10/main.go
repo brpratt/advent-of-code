@@ -1,10 +1,11 @@
-package day10
+package main
 
 import (
-	"bufio"
-	"io"
+	"fmt"
 	"math"
 	"sort"
+
+	"github.com/brpratt/advent-of-code/file"
 )
 
 type point struct {
@@ -169,7 +170,7 @@ func addLaserAngle(p0 point, points []point) []pointangle {
 	return pointangles
 }
 
-func SolvePart01(input []string) int {
+func part01(input []string) int {
 	points := extractPoints(input)
 
 	_, count := bestLocation(points)
@@ -177,7 +178,7 @@ func SolvePart01(input []string) int {
 	return count
 }
 
-func SolvePart02(input []string, count int) int {
+func part02(input []string, count int) int {
 	points := extractPoints(input)
 	p0, _ := bestLocation(points)
 	destroyed := 0
@@ -203,17 +204,9 @@ func SolvePart02(input []string, count int) int {
 	}
 }
 
-func Solve(part int, input io.Reader) int {
-	lines := make([]string, 0)
-	scanner := bufio.NewScanner(input)
+func main() {
+	lines := file.Must(file.ReadLines("input.txt"))
 
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if part == 1 {
-		return SolvePart01(lines)
-	}
-
-	return SolvePart02(lines, 200)
+	fmt.Println(part01(lines))
+	fmt.Println(part02(lines, 200))
 }

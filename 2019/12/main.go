@@ -1,4 +1,4 @@
-package day12
+package main
 
 import "fmt"
 
@@ -72,7 +72,7 @@ func energy(m moon) int {
 	return (abs(m.posX) + abs(m.posY) + abs(m.posZ)) * (abs(m.velX) + abs(m.velY) + abs(m.velZ))
 }
 
-func SolvePart01(moons []moon, steps int) int {
+func part01(moons []moon, steps int) int {
 	for i := 0; i < steps; i++ {
 		step(moons)
 	}
@@ -124,7 +124,7 @@ func matchZ(setA, setB []moon) bool {
 	return true
 }
 
-func SolvePart02(moons []moon) int {
+func part02(moons []moon) int {
 	scratch := make([]moon, len(moons))
 	copy(scratch, moons)
 
@@ -153,7 +153,7 @@ func SolvePart02(moons []moon) int {
 	return lcm(cycleX, lcm(cycleY, cycleZ))
 }
 
-func Solve(part int) int {
+func main() {
 	moons := []moon{
 		{posX: 1, posY: 3, posZ: -11},
 		{posX: 17, posY: -10, posZ: -8},
@@ -161,9 +161,6 @@ func Solve(part int) int {
 		{posX: 12, posY: -4, posZ: -4},
 	}
 
-	if part == 1 {
-		return SolvePart01(moons, 1000)
-	}
-
-	return SolvePart02(moons)
+	fmt.Println(part01(moons, 1000))
+	fmt.Println(part02(moons))
 }

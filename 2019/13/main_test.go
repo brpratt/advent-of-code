@@ -1,30 +1,32 @@
-package day13
+package main
 
 import (
-	"os"
 	"testing"
+
+	"github.com/brpratt/advent-of-code/2019/intcode"
+	"github.com/brpratt/advent-of-code/file"
 )
 
-func TestSolve(t *testing.T) {
-	tests := []struct {
-		part     int
-		expected int
-	}{
-		{1, 205},
-		{2, 10292},
+func TestPart01(t *testing.T) {
+	lines := file.Must(file.ReadLines("input.txt"))
+	program := intcode.FromText(lines[0])
+
+	expected := 205
+	got := part01(program)
+
+	if got != expected {
+		t.Errorf("expected %d, got %d", expected, got)
 	}
+}
 
-	for _, test := range tests {
-		file, err := os.Open("input.txt")
-		if err != nil {
-			t.Fatal(err)
-		}
+func TestPart02(t *testing.T) {
+	lines := file.Must(file.ReadLines("input.txt"))
+	program := intcode.FromText(lines[0])
 
-		got := Solve(test.part, file)
-		if got != test.expected {
-			t.Errorf("failed part %d: expected %d, got %d", test.part, test.expected, got)
-		}
+	expected := 10292
+	got := part02(program)
 
-		file.Close()
+	if got != expected {
+		t.Errorf("expected %d, got %d", expected, got)
 	}
 }

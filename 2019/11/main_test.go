@@ -1,49 +1,51 @@
-package day11
+package main
 
 import (
-	"os"
 	"testing"
+
+	"github.com/brpratt/advent-of-code/2019/intcode"
+	"github.com/brpratt/advent-of-code/file"
 )
 
-func TestSolvePart01(t *testing.T) {
-	tests := []struct {
-		program  []int
-		expected int
-	}{
-		{
-			[]int{3, 0, 104, 1, 99},
-			1,
-		},
-	}
+func TestPart01(t *testing.T) {
+	t.Run("example", func(t *testing.T) {
+		program := []int{3, 0, 104, 1, 99}
+		expected := 1
+		got := part01(program)
 
-	for _, test := range tests {
-		result := SolvePart01(test.program)
-		if result != test.expected {
-			t.Errorf("expected %d, got %d", test.expected, result)
+		if got != expected {
+			t.Errorf("expected %d, got %d", expected, got)
 		}
-	}
+	})
+
+	t.Run("actual", func(t *testing.T) {
+		lines := file.Must(file.ReadLines("input.txt"))
+		program := intcode.FromText(lines[0])
+
+		expected := 1967
+		got := part01(program)
+
+		if got != expected {
+			t.Errorf("expected %d, got %d", expected, got)
+		}
+	})
 }
 
-func TestSolve(t *testing.T) {
-	tests := []struct {
-		part     int
-		expected int
-	}{
-		{1, 1967},
-		{2, 0},
-	}
+func TestPart02(t *testing.T) {
+	lines := file.Must(file.ReadLines("input.txt"))
+	program := intcode.FromText(lines[0])
 
-	for _, test := range tests {
-		file, err := os.Open("input.txt")
-		if err != nil {
-			t.Fatal(err)
-		}
+	expected := ` #  # ###  #  # ####  ##  #### ###  #  #   
+ # #  #  # #  # #    #  #    # #  # # #    
+ ##   ###  #  # ###  #      #  ###  ##     
+ # #  #  # #  # #    # ##  #   #  # # #    
+ # #  #  # #  # #    #  # #    #  # # #    
+ #  # ###   ##  ####  ### #### ###  #  #   
+`
 
-		got := Solve(test.part, file)
-		if got != test.expected {
-			t.Errorf("failed part %d: expected %d, got %d", test.part, test.expected, got)
-		}
+	got := part02(program)
 
-		file.Close()
+	if got != expected {
+		t.Errorf("expected:\n%s\n got:\n%s", expected, got)
 	}
 }

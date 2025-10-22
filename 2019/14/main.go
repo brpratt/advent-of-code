@@ -1,10 +1,11 @@
-package day14
+package main
 
 import (
-	"bufio"
-	"io"
+	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/brpratt/advent-of-code/file"
 )
 
 type component struct {
@@ -114,7 +115,7 @@ func ore(cs map[string]int, reactions map[string]reaction) int {
 	return cs["ORE"]
 }
 
-func SolvePart01(equations []string) int {
+func part01(equations []string) int {
 	reactions := make(map[string]reaction)
 
 	for i := range equations {
@@ -129,7 +130,7 @@ func SolvePart01(equations []string) int {
 	return ore(cs, reactions)
 }
 
-func SolvePart02(equations []string) int {
+func part02(equations []string) int {
 	reactions := make(map[string]reaction)
 
 	for i := range equations {
@@ -155,17 +156,9 @@ func SolvePart02(equations []string) int {
 	return fuel
 }
 
-func Solve(part int, input io.Reader) int {
-	equations := make([]string, 0)
-	scanner := bufio.NewScanner(input)
+func main() {
+	equations := file.Must(file.ReadLines("input.txt"))
 
-	for scanner.Scan() {
-		equations = append(equations, scanner.Text())
-	}
-
-	if part == 1 {
-		return SolvePart01(equations)
-	}
-
-	return SolvePart02(equations)
+	fmt.Println(part01(equations))
+	fmt.Println(part02(equations))
 }
