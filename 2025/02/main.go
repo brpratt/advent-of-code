@@ -33,18 +33,18 @@ func digits(n int) int {
 	return count
 }
 
-func repeat(n int) int {
-	return (n * pow(10, digits(n))) + n
-}
+func repeat(n, count int) int {
+	var (
+		ds = digits(n)
+		m  = n
+	)
 
-func pivot(n int) int {
-	ds := digits(n)
-
-	if ds%2 == 0 {
-		return n / pow(10, ds/2)
+	for count > 1 {
+		m = m*pow(10, ds) + n
+		count--
 	}
 
-	return pow(10, ds/2)
+	return m
 }
 
 type idrange struct {
@@ -52,22 +52,36 @@ type idrange struct {
 	stop  int
 }
 
-func (r *idrange) invalidIDs() iter.Seq[int] {
-	p := pivot(r.start)
-	for repeat(p) < r.start {
-		p++
-	}
-
-	next := repeat(p)
+func (r *idrange) invalidIDs(extended bool) iter.Seq[int] {
+	pivot := 1
 
 	return func(yield func(int) bool) {
-		for next <= r.stop {
-			if !yield(next) {
-				return
+		seen := make(map[int]bool)
+
+		for repeat(pivot, 2) <= r.stop {
+			repetition := 2
+
+			for {
+				next := repeat(pivot, repetition)
+				if next > r.stop {
+					break
+				}
+
+				if next >= r.start && !seen[next] {
+					seen[next] = true
+					if !yield(next) {
+						return
+					}
+				}
+
+				if !extended {
+					break
+				}
+
+				repetition++
 			}
 
-			p++
-			next = repeat(p)
+			pivot++
 		}
 	}
 }
@@ -98,7 +112,19 @@ func part01(idranges []idrange) int {
 	var sum int
 
 	for _, idrange := range idranges {
-		for id := range idrange.invalidIDs() {
+		for id := range idrange.invalidIDs(false) {
+			sum += id
+		}
+	}
+
+	return sum
+}
+
+func part02(idranges []idrange) int {
+	var sum int
+
+	for _, idrange := range idranges {
+		for id := range idrange.invalidIDs(true) {
 			sum += id
 		}
 	}
@@ -111,4 +137,5 @@ func main() {
 	idranges := parseRanges(input)
 
 	fmt.Println(part01(idranges))
+	fmt.Println(part02(idranges))
 }
