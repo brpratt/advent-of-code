@@ -24,8 +24,10 @@ func (b bank) Batteries() []int {
 }
 
 func parseBanks(r io.Reader) []bank {
-	banks := make([]bank, 0)
-	scanner := bufio.NewScanner(r)
+	var (
+		banks   = make([]bank, 0)
+		scanner = bufio.NewScanner(r)
+	)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -35,31 +37,51 @@ func parseBanks(r io.Reader) []bank {
 	return banks
 }
 
-func maxJoltage(b bank) int {
-	batteries := b.Batteries()
-	leftidx := 0
+func maxJoltage(b bank, num int) int {
+	var (
+		batteries = b.Batteries()
+		idxs      = make([]int, num)
+	)
 
-	for i := 1; i < len(batteries)-1; i++ {
-		if batteries[i] > batteries[leftidx] {
-			leftidx = i
+	for i := range idxs {
+		idx := 0
+
+		if i > 0 {
+			idx = idxs[i-1] + 1
 		}
+
+		for j := idx + 1; j < len(batteries)-(num-i-1); j++ {
+			if batteries[j] > batteries[idx] {
+				idx = j
+			}
+		}
+
+		idxs[i] = idx
 	}
 
-	rightidx := leftidx + 1
-	for i := rightidx + 1; i < len(batteries); i++ {
-		if batteries[i] > batteries[rightidx] {
-			rightidx = i
-		}
+	joltage := batteries[idxs[0]]
+	for i := 1; i < len(idxs); i++ {
+		joltage = (joltage * 10) + batteries[idxs[i]]
 	}
 
-	return (batteries[leftidx] * 10) + batteries[rightidx]
+	return joltage
 }
 
 func part01(banks []bank) int {
 	var sum int
 
 	for _, bank := range banks {
-		sum += maxJoltage(bank)
+		sum += maxJoltage(bank, 2)
+	}
+
+	return sum
+}
+
+func part02(banks []bank) int {
+	var sum int
+
+	for _, bank := range banks {
+		sum += maxJoltage(bank, 12)
 	}
 
 	return sum
@@ -71,4 +93,5 @@ func main() {
 
 	banks := parseBanks(input)
 	fmt.Println(part01(banks))
+	fmt.Println(part02(banks))
 }
