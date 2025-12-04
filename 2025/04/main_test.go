@@ -45,3 +45,41 @@ func TestPart01(t *testing.T) {
 		}
 	})
 }
+
+func TestPart02(t *testing.T) {
+	t.Run("example", func(t *testing.T) {
+		input := `..@@.@@@@.
+@@@.@.@.@@
+@@@@@.@.@@
+@.@@@@..@.
+@@.@@@@.@@
+.@@@@@@@.@
+.@.@.@.@@@
+@.@@@.@@@@
+.@@@@@@@@.
+@.@.@@@.@.`
+
+		g := parseGrid(strings.NewReader(input))
+
+		expected := 43
+		got := part02(g)
+
+		if expected != got {
+			t.Fatalf("expected %d, got %d", expected, got)
+		}
+	})
+
+	t.Run("actual", func(t *testing.T) {
+		input := file.Must(os.Open("input.txt"))
+		defer input.Close()
+
+		g := parseGrid(input)
+
+		expected := 9024
+		got := part02(g)
+
+		if expected != got {
+			t.Fatalf("expected %d, got %d", expected, got)
+		}
+	})
+}

@@ -49,8 +49,8 @@ func adjancentRolls(p grid.Point, g grid.Grid[byte]) int {
 	return count
 }
 
-func part01(g grid.Grid[byte]) int {
-	var count int
+func accessibleRolls(g grid.Grid[byte]) []grid.Point {
+	accessible := make([]grid.Point, 0)
 
 	for y := range g {
 		for x := range len(g[y]) {
@@ -58,8 +58,33 @@ func part01(g grid.Grid[byte]) int {
 
 			value, _ := g.Value(p)
 			if value == '@' && adjancentRolls(p, g) < 4 {
-				count++
+				accessible = append(accessible, p)
 			}
+		}
+	}
+
+	return accessible
+}
+
+func part01(g grid.Grid[byte]) int {
+	return len(accessibleRolls(g))
+}
+
+func part02(g grid.Grid[byte]) int {
+	var count int
+	ng := g.Copy()
+
+	for {
+		accessible := accessibleRolls(ng)
+
+		if len(accessible) == 0 {
+			break
+		}
+
+		count += len(accessible)
+
+		for _, p := range accessible {
+			ng.SetValue(p, '.')
 		}
 	}
 
@@ -73,4 +98,5 @@ func main() {
 	g := parseGrid(input)
 
 	fmt.Println(part01(g))
+	fmt.Println(part02(g))
 }

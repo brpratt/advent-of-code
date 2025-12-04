@@ -128,3 +128,14 @@ func (g Grid[T]) Column(n int) []T {
 
 	return c
 }
+
+func (g Grid[T]) Copy() Grid[T] {
+	ng := make(Grid[T], len(g))
+
+	for y := range g {
+		ng[y] = make([]T, len(g[y]))
+		copy(ng[y], g[y])
+	}
+
+	return ng
+}
