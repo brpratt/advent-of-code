@@ -19,15 +19,38 @@ func (idr idrange) includes(id int) bool {
 	return id >= idr.start && id <= idr.end
 }
 
-func parseIDRange(input string) idrange {
-	var start, stop int
+func (idr idrange) count() int {
+	return (idr.end - idr.start) + 1
+}
 
-	_, err := fmt.Sscanf(input, "%d-%d", &start, &stop)
+func overlaps(a, b idrange) bool {
+	if b.end < a.start {
+		return false
+	}
+
+	if b.start > a.end {
+		return false
+	}
+
+	return true
+}
+
+func merge(a, b idrange) idrange {
+	return idrange{
+		start: min(b.start, a.start),
+		end:   max(b.end, a.end),
+	}
+}
+
+func parseRange(input string) idrange {
+	var start, end int
+
+	_, err := fmt.Sscanf(input, "%d-%d", &start, &end)
 	if err != nil {
 		panic("failed to parse ID range")
 	}
 
-	return idrange{start, stop}
+	return idrange{start: start, end: end}
 }
 
 func isFresh(id int, idranges []idrange) bool {
@@ -50,7 +73,7 @@ func parseInput(r io.Reader) ([]idrange, []int) {
 			break
 		}
 
-		idranges = append(idranges, parseIDRange(line))
+		idranges = append(idranges, parseRange(line))
 	}
 
 	var ids []int
@@ -74,10 +97,54 @@ func part01(idranges []idrange, ids []int) int {
 	return fresh
 }
 
+func appendWithMerge(idranges []idrange, idr idrange) []idrange {
+	for i := range idranges {
+		if overlaps(idr, idranges[i]) {
+			idranges[i] = merge(idr, idranges[i])
+			return idranges
+		}
+	}
+
+	idranges = append(idranges, idr)
+	return idranges
+}
+
+func squash(idranges []idrange) []idrange {
+	squashed := make([]idrange, len(idranges))
+	copy(squashed, idranges)
+
+	for {
+		var merged []idrange
+		for _, idrange := range squashed {
+			merged = appendWithMerge(merged, idrange)
+		}
+
+		if len(squashed) == len(merged) {
+			break
+		}
+
+		squashed = merged
+	}
+
+	return squashed
+}
+
+func part02(idranges []idrange) int {
+	var fresh int
+
+	squashed := squash(idranges)
+	for _, idrange := range squashed {
+		fresh += idrange.count()
+	}
+
+	return fresh
+}
+
 func main() {
 	input := file.Must(os.Open("input.txt"))
 	defer input.Close()
 
 	idranges, ids := parseInput(input)
 	fmt.Println(part01(idranges, ids))
+	fmt.Println(part02(idranges))
 }
